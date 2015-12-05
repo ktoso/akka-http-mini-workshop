@@ -1,0 +1,10 @@
+target
+20150817.json.tar.gz
+*.json
+*.log
+20150817.json.gz
+example-project/jmh.out
+project/target
+.idea
+.idea_modules
+hs_err*
