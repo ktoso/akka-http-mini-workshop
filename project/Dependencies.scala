@@ -2,21 +2,14 @@ import sbt._
 
 object Dependencies {
   object Version {
-    val akka        = "2.4.0-RC1"
-    val akkaStreams = "1.0"
+    val akka        = "2.4.1"
+    val akkaStreams = "2.0-M2"
     val leveldb = "0.7"
-    val algebird = "0.11.0"
     val logback = "1.1.2"
   }
 
   object Compile {
     val akkaActor            = "com.typesafe.akka" %% "akka-actor"            % Version.akka
-
-    val akkaCluster          = "com.typesafe.akka" %% "akka-cluster"          % Version.akka
-    val akkaClusterTools     = "com.typesafe.akka" %% "akka-cluster-tools"    % Version.akka
-    val akkaPersistence      = "com.typesafe.akka" %% "akka-persistence"      % Version.akka
-    val akkaClusterSharding  = "com.typesafe.akka" %% "akka-cluster-sharding" % Version.akka // pulls in akka-persistence
-    val leveldb              = "org.iq80.leveldb"   % "leveldb"               % Version.leveldb // for sharding
 
     val akkaStream           = "com.typesafe.akka" %%"akka-stream-experimental"         % Version.akkaStreams
     val akkaStreamTestkit    = "com.typesafe.akka" %%"akka-stream-testkit-experimental" % Version.akkaStreams
@@ -31,8 +24,6 @@ object Dependencies {
 
     val akkaSlf4j            = "com.typesafe.akka" %% "akka-slf4j"                    % Version.akka
     val logbackClassic       = "ch.qos.logback"    %  "logback-classic"               % Version.logback
-
-    val algebird             = "com.twitter"       %% "algebird-core"                     % Version.algebird
   }
   object Test {
     val scalaTest = "org.scalatest" %% "scalatest"  % "2.1.6" % "test"
@@ -41,13 +32,12 @@ object Dependencies {
 
   import Compile._
   private val testing = Seq(Test.scalaTest, Test.commonsIo)
-  private val cluster = Seq(akkaCluster, akkaClusterTools, akkaClusterSharding, akkaPersistence, leveldb) ++ Seq(akkaMultiNodeTestKit)
   private val streams = Seq(akkaStream, akkaStreamTestkit)
   private val logging = Seq(akkaSlf4j, logbackClassic)
 
   val core = Seq(akkaActor, akkaTestKit) ++ streams ++ testing ++ logging
-  val engine = Seq(akkaActor, algebird) ++ cluster ++ testing
-  val service = Seq(akkaActor, akkaHttpCore, akkaHttp, akkaHttpSprayJson, akkaHttpXml, akkaHttpTestkit) ++ testing
+  val engine = Seq(akkaActor) ++ testing ++ logging
+  val service = Seq(akkaActor, akkaHttpCore, akkaHttp, akkaHttpSprayJson, akkaHttpXml, akkaHttpTestkit) ++ testing ++ logging
 
   // all in one project, to be usable from Activator
   val all = core ++ engine ++ service

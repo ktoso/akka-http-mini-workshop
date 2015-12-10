@@ -1,0 +1,10 @@
+explain what RS is
+
+asynchronous boundary
+
+buffers between stages
+
+how backpressure works
+
+now explain that it's inter-op, so all layers work with it
+

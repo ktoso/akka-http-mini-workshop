@@ -1,0 +1,5 @@
+Akka Http is an entire http model
+
+and engine to parse/run/reply to those
+
+an http entity has headers and a body - maybe streaming

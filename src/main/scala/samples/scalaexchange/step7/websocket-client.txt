@@ -1,0 +1,9 @@
+Talk about how websockets are bound later - the websocket upgrade.
+
+Strict messages are "element by element", so fit well here.
+WS messages usually not very large, but of course could be so pick your tool wisely.
+
+How to make a Flow from unconnected source or sink?
+
+Nicer API will be added later, the important bit is a correct model.
+

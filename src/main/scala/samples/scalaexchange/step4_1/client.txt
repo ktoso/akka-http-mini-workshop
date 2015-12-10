@@ -1,0 +1,9 @@
+use Http().singleRequest(...)
+
+be like curl (response.entity.dataBytes)
+
+// previously spray could not do this natively
+
+explain via(Gzip.decoderFlow), if we need it
+
+explain run* vs other methods, materialization etc

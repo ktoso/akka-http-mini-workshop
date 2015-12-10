@@ -1,0 +1,1 @@
+So what are the ways we can receive data in a streaming way in the 
