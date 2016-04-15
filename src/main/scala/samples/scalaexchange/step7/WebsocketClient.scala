@@ -25,8 +25,4 @@ object WebsocketClient extends SampleApp
   private val singleExchange = connect(uri, printlnSink, helloSource)
   Await.result(singleExchange, 10.seconds) // connection OK.
 
-  StdIn.readLine("Press [RETURN] to quit...")
-   system.terminate()
-
-
 }

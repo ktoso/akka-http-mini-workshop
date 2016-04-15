@@ -30,6 +30,4 @@ object HttpServiceApp extends SampleApp
   // start the http server:
   val bindingFuture = Http().bindAndHandle(route, "127.0.0.1", 8080)
 
-  StdIn.readLine("Press [RETURN] to quit...")
-  system.terminate()
 }
