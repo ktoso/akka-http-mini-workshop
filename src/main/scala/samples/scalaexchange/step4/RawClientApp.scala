@@ -4,7 +4,7 @@ import java.io.File
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.stream.scaladsl.{FileIO, Sink}
+import akka.stream.scaladsl.FileIO
 import samples.scalaexchange.utils.SampleApp
 
 import scala.concurrent.duration._
@@ -17,13 +17,13 @@ object RawClientApp extends SampleApp {
   val downloadedOut = new File("downloaded.out")
   val NoLimit = Long.MaxValue
 
-  val request = HttpRequest(uri = "https://skillsmatter.com/conferences/6862-scala-exchange-2015")
+  val request = HttpRequest(uri = "http://www.meetup.com/Java-User-Group-Lodz/events/229985795/")
   val response: Future[HttpResponse] =
     Http().singleRequest(request)
 
   val bytesWritten =
     response flatMap { r =>
-      val bytes = r.entity.withSizeLimit(NoLimit).dataBytes
+      val bytes = r.entity.withoutSizeLimit().dataBytes
 
       val completion =
         bytes
