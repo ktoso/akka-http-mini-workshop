@@ -5,6 +5,7 @@ package akka.stream.io
 
 import java.nio.ByteOrder
 
+import akka.NotUsed
 import akka.stream.impl.JsonBracketCounting
 import akka.stream.scaladsl.{ BidiFlow, Flow, Keep }
 import akka.stream.stage.{ Context, PushPullStage, SyncDirective, _ }
@@ -32,7 +33,7 @@ object Framing {
    *                           exceeded this Flow will fail the stream.
    * @return
    */
-  def delimiter(delimiter: ByteString, maximumFrameLength: Int, allowTruncation: Boolean = false): Flow[ByteString, ByteString, Unit] =
+  def delimiter(delimiter: ByteString, maximumFrameLength: Int, allowTruncation: Boolean = false): Flow[ByteString, ByteString, NotUsed] =
     Flow[ByteString].transform(() ⇒ new DelimiterFramingStage(delimiter, maximumFrameLength, allowTruncation))
       .named("delimiterFraming")
 
@@ -54,7 +55,7 @@ object Framing {
   def lengthField(fieldLength: Int,
                   fieldOffset: Int = 0,
                   maximumFrameLength: Int,
-                  byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): Flow[ByteString, ByteString, Unit] = {
+                  byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): Flow[ByteString, ByteString, NotUsed] = {
     require(fieldLength >= 1 && fieldLength <= 4, "Length field length must be 1, 2, 3 or 4.")
     Flow[ByteString].transform(() ⇒ new LengthFieldFramingStage(fieldLength, fieldOffset, maximumFrameLength, byteOrder))
       .named("lengthFieldFraming")
@@ -85,7 +86,7 @@ object Framing {
    * @param maximumObjectLength The maximum length of allowed frames while decoding. If the maximum length is exceeded
    *                         this Flow will fail the stream.
    */
-  def json(maximumObjectLength: Int): Flow[ByteString, ByteString, Unit] =
+  def json(maximumObjectLength: Int): Flow[ByteString, ByteString, NotUsed] =
     Flow[ByteString].transform(() ⇒ new PushPullStage[ByteString, ByteString] {
       private val buffer = new JsonBracketCounting(maximumObjectLength)
 
@@ -150,7 +151,7 @@ object Framing {
 
     })
 
-    BidiFlow.fromFlowsMat(encoder, decoder)(Keep.left)
+    BidiFlow.fromFlowsMat(encoder, decoder)({ case (l, r) => ()})
   }
 
   private trait IntDecoder {
@@ -321,5 +322,5 @@ object Framing {
  * Used for providing a framing implicitly for other components which may need one (such as framed entity streaming in Akka HTTP).
  */
 trait Framing {
-  def flow: Flow[ByteString, ByteString, Unit]
+  def flow: Flow[ByteString, ByteString, NotUsed]
 }

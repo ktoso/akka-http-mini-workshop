@@ -24,7 +24,7 @@ trait TweetsStreamService extends Directives
     path("tweets") {
       get {
         complete {
-          Source(() => Iterator.continually(randomTweet()))
+          Source.fromIterator(() => Iterator.continually(randomTweet()))
 //            .log("tweets").withAttributes(Attributes.logLevels(onElement = Logging.InfoLevel)) // TODO explain attributes
             // TODO show renderAsyncUnordered
             // TODO explain idleTimeouts

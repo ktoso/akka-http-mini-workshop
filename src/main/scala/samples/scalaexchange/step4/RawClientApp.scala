@@ -4,7 +4,7 @@ import java.io.File
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{FileIO, Sink}
 import samples.scalaexchange.utils.SampleApp
 
 import scala.concurrent.duration._
@@ -27,7 +27,7 @@ object RawClientApp extends SampleApp {
 
       val completion =
         bytes
-          .runWith(Sink.file(downloadedOut))
+          .runWith(FileIO.toFile(downloadedOut))
 
       completion
     }

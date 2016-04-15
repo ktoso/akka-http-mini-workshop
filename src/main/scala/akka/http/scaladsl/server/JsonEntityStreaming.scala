@@ -3,8 +3,10 @@
  */
 package akka.http.scaladsl.server
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.impl.util.JavaMapping
+import akka.http.scaladsl.model.ContentType.WithFixedCharset
 import akka.http.scaladsl.model.{ ContentType, ContentTypes }
 import akka.http.scaladsl.server.directives.EntityStreamingDirectives.SourceRenderingMode
 import akka.stream.io.Framing
@@ -19,14 +21,14 @@ import scala.collection.immutable
  * which can be used to reject routes if content type does not match used framing.
  */
 abstract class FramingWithContentType extends Framing {
-  def flow: Flow[ByteString, ByteString, Unit]
+  def flow: Flow[ByteString, ByteString, NotUsed]
   def supported: immutable.Set[ContentType]
   def isSupported(ct: akka.http.javadsl.model.ContentType): Boolean = supported(JavaMapping.ContentType.toScala(ct))
 }
 object FramingWithContentType {
   def apply(framing: Flow[ByteString, ByteString, Any], contentType: ContentType, moreContentTypes: ContentType*) =
     new FramingWithContentType {
-      override def flow: Flow[ByteString, ByteString, Unit] = framing.mapMaterializedValue(_ ⇒ ())
+      override def flow: Flow[ByteString, ByteString, NotUsed] = framing.mapMaterializedValue(_ => NotUsed)
 
       override def supported: Set[ContentType] =
         if (moreContentTypes.isEmpty) Set(contentType)
@@ -47,7 +49,7 @@ trait JsonEntityFramingSupport {
   implicit object JsonFraming extends FramingWithContentType { // TODO find the max object size
     override final val flow = Flow[ByteString].via(Framing.json(Int.MaxValue))
 
-    override val supported = Set(ContentTypes.`application/json`)
+    override val supported: Set[ContentType] = immutable.Set(ContentTypes.`application/json`)
   }
 }
 object JsonEntityFramingSupport extends JsonEntityFramingSupport

@@ -8,7 +8,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.HttpCharsets.`UTF-8`
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{FileIO, Source}
 
 trait SimpleStreamService extends Directives with ScalaXmlSupport {
   implicit def system: ActorSystem
@@ -21,7 +21,7 @@ trait SimpleStreamService extends Directives with ScalaXmlSupport {
   def simpleStreamRoutes =
     path("stream" / "simple") {
       complete {
-        HttpEntity(`text/csv`, Source.file(DataFile))
+        HttpEntity(`text/csv`, FileIO.fromFile(DataFile))
       }
     }
 }

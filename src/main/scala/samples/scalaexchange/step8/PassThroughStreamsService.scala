@@ -30,7 +30,7 @@ trait PassThroughStreamsService extends Directives
         onComplete(Http().singleRequest(req)) {
           case Success(res) =>
             val entityStream = res.entity.withSizeLimit(NoLimit).dataBytes
-            complete(HttpEntity(ContentTypes.`text/html`, entityStream))
+            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, entityStream))
         }
       }
     }

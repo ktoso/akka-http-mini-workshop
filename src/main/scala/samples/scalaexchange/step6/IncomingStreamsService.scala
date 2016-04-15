@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.directives.EntityStreamingDirectives
 import akka.http.scaladsl.server.{Directives, JsonSourceRenderingMode}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.scaladsl.{FileIO, Flow, Sink, Source}
 import akka.util.ByteString
 import spray.json.{RootJsonFormat, DefaultJsonProtocol}
 
@@ -48,7 +48,7 @@ trait IncomingStreamsService extends Directives
       val bytes: Source[ByteString, Any] = req.entity.dataBytes
       val doneDraining = bytes
         // .alsoTo(Flow[ByteString].map(_.length).fold(0)(_+_).map("Uploaded: " + _).to(Sink.foreach(println)))
-        .runWith(Sink.file(`/dev/null`))
+        .runWith(FileIO.toFile(`/dev/null`))
 
       onComplete(doneDraining) {
         case Success(written) => complete(s"Thanks for sending us $written bytes!")

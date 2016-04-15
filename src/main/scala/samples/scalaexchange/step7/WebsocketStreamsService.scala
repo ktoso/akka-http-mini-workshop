@@ -27,7 +27,7 @@ trait WebsocketStreamsService extends Directives
   val websocketStreams =
     pathPrefix("ws") {
       path("tweetEcho") {
-        handleWebsocketMessages {
+        handleWebSocketMessages {
           Flow[Message]
             .take(10)
             .log("from-client").withAttributes(Attributes.logLevels(Logging.InfoLevel))

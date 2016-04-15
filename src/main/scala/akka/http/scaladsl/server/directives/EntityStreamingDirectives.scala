@@ -3,6 +3,7 @@
  */
 package akka.http.scaladsl.server.directives
 
+import akka.NotUsed
 import akka.http.scaladsl.marshalling._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.FramingWithContentType
@@ -23,7 +24,7 @@ import scala.language.implicitConversions
 trait EntityStreamingDirectives extends MarshallingDirectives {
   import EntityStreamingDirectives._
 
-  type RequestToSourceUnmarshaller[T] = FromRequestUnmarshaller[Source[T, Any]]
+  type RequestToSourceUnmarshaller[T] = FromRequestUnmarshaller[Source[T, NotUsed]]
 
   // TODO DOCS
 
@@ -33,12 +34,12 @@ trait EntityStreamingDirectives extends MarshallingDirectives {
     streamAsync(1)(um, framing)
 
   final def streamAsync[T](parallelism: Int)(implicit um: Unmarshaller[ByteString, T], framing: FramingWithContentType): RequestToSourceUnmarshaller[T] =
-    streamInternal[T](framing, (ec, mat) ⇒ Flow[ByteString].mapAsync(parallelism)(Unmarshal(_).to[T](um, ec, mat)))
+    streamInternal[T](framing, (ec, mat) ⇒ Flow[ByteString].mapAsync(parallelism)(Unmarshal(_).to[T](um, ec, mat)).mapMaterializedValue(_ => ()))
   final def streamAsync[T](parallelism: Int, framing: FramingWithContentType)(implicit um: Unmarshaller[ByteString, T]): RequestToSourceUnmarshaller[T] =
     streamAsync(parallelism)(um, framing)
 
   final def streamAsyncUnordered[T](parallelism: Int)(implicit um: Unmarshaller[ByteString, T], framing: FramingWithContentType): RequestToSourceUnmarshaller[T] =
-    streamInternal[T](framing, (ec, mat) ⇒ Flow[ByteString].mapAsyncUnordered(parallelism)(Unmarshal(_).to[T](um, ec, mat)))
+    streamInternal[T](framing, (ec, mat) ⇒ Flow[ByteString].mapAsyncUnordered(parallelism)(Unmarshal(_).to[T](um, ec, mat)).mapMaterializedValue(_ => ()))
   final def streamAsyncUnordered[T](parallelism: Int, framing: FramingWithContentType)(implicit um: Unmarshaller[ByteString, T]): RequestToSourceUnmarshaller[T] =
     streamAsyncUnordered(parallelism)(um, framing)
 
@@ -46,14 +47,15 @@ trait EntityStreamingDirectives extends MarshallingDirectives {
   // TODO could expose `streamMat`, for more fine grained picking of Marshaller
 
   // format: OFF
-  private def streamInternal[T](framing: FramingWithContentType, marshalling: (ExecutionContext, Materializer) => Flow[ByteString, ByteString, Unit]#Repr[T, Unit]): RequestToSourceUnmarshaller[T] =
-    Unmarshaller.withMaterializer[HttpRequest, Source[T, Any]] { implicit ec ⇒ implicit mat ⇒ req ⇒
+  private def streamInternal[T](framing: FramingWithContentType, marshalling: (ExecutionContext, Materializer) => Flow[ByteString, T, Unit]): RequestToSourceUnmarshaller[T] =
+    Unmarshaller.withMaterializer[HttpRequest, Source[T, NotUsed]] { implicit ec ⇒ implicit mat ⇒ req ⇒
+
       val entity = req.entity
       if (!framing.supported(entity.contentType)) {
         val supportedContentTypes = framing.supported.map(ContentTypeRange(_))
         FastFuture.failed(Unmarshaller.UnsupportedContentTypeException(supportedContentTypes))
       } else {
-        val stream = entity.dataBytes.via(framing.flow).via(marshalling(ec, mat))
+        val stream = entity.dataBytes.via(framing.flow).via(marshalling(ec, mat)).mapMaterializedValue(_ => NotUsed)
         FastFuture.successful(stream)
       }
     }
@@ -65,7 +67,7 @@ trait EntityStreamingDirectives extends MarshallingDirectives {
     Marshaller[Source[T, Any], HttpResponse] { implicit ec ⇒
       source ⇒
         FastFuture successful {
-          Marshalling.WithFixedCharset(mode.contentType.mediaType, mode.charset, () ⇒ {
+          Marshalling.WithFixedContentType(mode.contentType, () ⇒ {
             val bytes = source
               .mapAsync(1)(t ⇒ Marshal(t).to[HttpEntity])
               .map(_.dataBytes)
@@ -80,7 +82,7 @@ trait EntityStreamingDirectives extends MarshallingDirectives {
     Marshaller[AsyncRenderingOf[T], HttpResponse] { implicit ec ⇒
       rendering ⇒
         FastFuture successful {
-          Marshalling.WithFixedCharset(mode.contentType.mediaType, mode.charset, () ⇒ {
+          Marshalling.WithFixedContentType(mode.contentType, () ⇒ {
             val bytes = rendering.source
               .mapAsync(rendering.parallelism)(t ⇒ Marshal(t).to[HttpEntity])
               .map(_.dataBytes)
@@ -95,7 +97,7 @@ trait EntityStreamingDirectives extends MarshallingDirectives {
     Marshaller[AsyncUnorderedRenderingOf[T], HttpResponse] { implicit ec ⇒
       rendering ⇒
         FastFuture successful {
-          Marshalling.WithFixedCharset(mode.contentType.mediaType, mode.charset, () ⇒ {
+          Marshalling.WithFixedContentType(mode.contentType, () ⇒ {
             val bytes = rendering.source
               .mapAsync(rendering.parallelism)(t ⇒ Marshal(t).to[HttpEntity])
               .map(_.dataBytes)

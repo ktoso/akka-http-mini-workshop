@@ -2,8 +2,8 @@ import sbt._
 
 object Dependencies {
   object Version {
-    val akka        = "2.4.1"
-    val akkaStreams = "2.0-M2"
+    val akka        = "2.4.4"
+    val akkaStreams = "2.4.4"
     val leveldb = "0.7"
     val logback = "1.1.2"
   }
@@ -11,16 +11,18 @@ object Dependencies {
   object Compile {
     val akkaActor            = "com.typesafe.akka" %% "akka-actor"            % Version.akka
 
-    val akkaStream           = "com.typesafe.akka" %%"akka-stream-experimental"         % Version.akkaStreams
-    val akkaStreamTestkit    = "com.typesafe.akka" %%"akka-stream-testkit-experimental" % Version.akkaStreams
-    val akkaHttpCore         = "com.typesafe.akka" %%"akka-http-core-experimental"      % Version.akkaStreams
+    val akkaStream           = "com.typesafe.akka" %%"akka-stream"                      % Version.akkaStreams
+    val akkaHttpCore         = "com.typesafe.akka" %%"akka-http-core"                   % Version.akkaStreams
     val akkaHttp             = "com.typesafe.akka" %% "akka-http-experimental"          % Version.akkaStreams
-    val akkaTestKit          = "com.typesafe.akka" %% "akka-testkit"                    % Version.akka
-    val akkaMultiNodeTestKit = "com.typesafe.akka" %% "akka-multi-node-testkit"         % Version.akka
+
 
     val akkaHttpSprayJson    = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akkaStreams
     val akkaHttpXml          = "com.typesafe.akka" %% "akka-http-xml-experimental"        % Version.akkaStreams
-    val akkaHttpTestkit      = "com.typesafe.akka" %% "akka-http-testkit-experimental"    % Version.akkaStreams
+
+    val akkaHttpTestkit      = "com.typesafe.akka" %% "akka-http-testkit"                 % Version.akkaStreams
+    val akkaStreamTestkit    = "com.typesafe.akka" %%"akka-stream-testkit"                % Version.akkaStreams
+    val akkaTestKit          = "com.typesafe.akka" %% "akka-testkit"                      % Version.akka
+    val akkaMultiNodeTestKit = "com.typesafe.akka" %% "akka-multi-node-testkit"           % Version.akka
 
     val akkaSlf4j            = "com.typesafe.akka" %% "akka-slf4j"                    % Version.akka
     val logbackClassic       = "ch.qos.logback"    %  "logback-classic"               % Version.logback
